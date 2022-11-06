@@ -101,6 +101,39 @@ def get_contexts(dataset_file="/mnt/b5320167-5dbd-4498-bf34-173ac5338c8d/Dataset
         fh.write(all_contexts.lower() if downcase else all_contexts)
 
 
+def get_clinical_cases(dataset_file):
+    """
+    Gets passage text with no concept annotations.
+    """
+
+    cases_narratives_output_file="output/cases-narratives.txt"
+    cases_titles_output_file="output/cases-titles.txt"
+
+    dataset = load_json(dataset_file)
+    n_all = 0
+    all_contexts = ""
+
+    with open(cases_narratives_output_file, "w") as file, open(cases_titles_output_file, "w") as filet:
+        i = 0
+        cont_words = 0
+        for datum in dataset[DATA_KEY]:
+            new_context = remove_concept_marks(datum[DOC_KEY][CONTEXT_KEY])
+            title = remove_concept_marks(datum[DOC_KEY][TITLE_KEY])
+
+            if (title != 'This article has a correction'):
+                cont_words += len(title)
+                i += 1
+                new_context = new_context.replace("\n\n", " ")
+                new_context = new_context.replace("\n", "")
+
+                filet.write(title + '\n')
+                file.write(new_context + "\n")
+
+    print("Clinical Cases amount: " + str(i))
+    print('Titles length (average): '+ str(cont_words/i))
+
+
+
 def get_doc_ids(dataset_file="/mnt/b5320167-5dbd-4498-bf34-173ac5338c8d/Datasets/bmj_case_reports_data/dataset_json_concept_annotated/dataset1.0.json"):
     doc_ids = set()
     dataset = load_json(dataset_file)
@@ -729,36 +762,39 @@ def misc():
         if len(w.split()) == 3:
             print(w)
 
+# if __name__ == '__main__':
+#     parser = argparse.ArgumentParser(
+#         description='Statistics for the CliCR dataset')
+#     parser.add_argument('-train_file', help='Path to the training set in json format.')
+#     parser.add_argument('-dev_file', help='Path to the dev set in json format.')
+#     parser.add_argument('-test_file', help='Path to the test set in json format.')
+#     args = parser.parse_args()
+#
+#     #print(print_data_format())
+#     #print(percentage_of_ans_in_docs(include_extended=False))
+#     #get_contexts(downcase=True)
+#     #p=percentage_of_concept_ans_in_doc(include_extended=False)
+#     #print("% found in doc: {}, extended={}".format(p, False))
+#     #p=percentage_of_concept_ans_in_doc(include_extended=True)
+#     #print("% found in doc: {}, extended={}".format(p, True))
+#     #p=percentage_of_concept_ans_in_docs(include_extended=False)
+#     #print("% found in docs: {}, extended={}".format(p, False))
+#     #p=percentage_of_concept_ans_in_docs(include_extended=True)
+#     #print("% found in docs: {}, extended={}".format(p, True))
+#
+#
+#     #get_article_series()
+#     #get_article_specialty_table()
+#     #get_article_specialty_table_R_vertical(top=25)
+#     #print(plot_article_specialty())
+#     #print(plot_article_series())
+#
+#     print_general_stats(args.train_file, args.dev_file, args.test_file)
+#     #print(ratio_ans(args.train_file, args.dev_file, args.test_file))
+#     #print(ratio_ans_fq(args.train_file, args.dev_file, args.test_file))
+#     #print_dist()
+#     #print_year_dist()
+#     #misc()
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Statistics for the CliCR dataset')
-    parser.add_argument('-train_file', help='Path to the training set in json format.')
-    parser.add_argument('-dev_file', help='Path to the dev set in json format.')
-    parser.add_argument('-test_file', help='Path to the test set in json format.')
-    args = parser.parse_args()
-
-    #print(print_data_format())
-    #print(percentage_of_ans_in_docs(include_extended=False))
-    #get_contexts(downcase=True)
-    #p=percentage_of_concept_ans_in_doc(include_extended=False)
-    #print("% found in doc: {}, extended={}".format(p, False))
-    #p=percentage_of_concept_ans_in_doc(include_extended=True)
-    #print("% found in doc: {}, extended={}".format(p, True))
-    #p=percentage_of_concept_ans_in_docs(include_extended=False)
-    #print("% found in docs: {}, extended={}".format(p, False))
-    #p=percentage_of_concept_ans_in_docs(include_extended=True)
-    #print("% found in docs: {}, extended={}".format(p, True))
-
-
-    #get_article_series()
-    #get_article_specialty_table()
-    #get_article_specialty_table_R_vertical(top=25)
-    #print(plot_article_specialty())
-    #print(plot_article_series())
-
-    print_general_stats(args.train_file, args.dev_file, args.test_file)
-    #print(ratio_ans(args.train_file, args.dev_file, args.test_file))
-    #print(ratio_ans_fq(args.train_file, args.dev_file, args.test_file))
-    #print_dist()
-    #print_year_dist()
-    #misc()
+    get_clinical_cases("dataset/train1.0.json")
